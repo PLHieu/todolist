@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  todolist:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${TODOLIST_PORT}:${TODOLIST_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - docker.env
+    restart: on-failure
+  db:
+    image: postgres:15.0-alpine
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    env_file:
+      - docker.env
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U root -d todos" ]
+      interval: 1s
+      timeout: 1s
+      retries: 5
